@@ -36,7 +36,12 @@
 namespace FW
 {
 	/// Type for a string
+#ifdef UNICODE
+	typedef std::wstring String;
+#else
 	typedef std::string String;
+#endif
+
 	/// Type for a watch id
 	typedef unsigned long WatchID;
 
@@ -50,10 +55,25 @@ namespace FW
 	{
 	public:
 		Exception(const String& message)
-			: std::runtime_error(message)
+			: std::runtime_error(std::string(message.begin(), message.end()).c_str())
 		{}
 	};
 
+#ifdef UNICODE
+	/// Exception thrown when a file is not found.
+	/// @class FileNotFoundException
+	class FileNotFoundException : public Exception
+	{
+	public:
+		FileNotFoundException()
+			: Exception(L"File not found")
+		{}
+
+		FileNotFoundException(const String& filename)
+			: Exception(L"File not found (" + filename + L")")
+		{}
+	};
+#else
 	/// Exception thrown when a file is not found.
 	/// @class FileNotFoundException
 	class FileNotFoundException : public Exception
@@ -67,6 +87,7 @@ namespace FW
 			: Exception("File not found (" + filename + ")")
 		{}
 	};
+#endif
 
 	/// Actions to listen for. Rename will send two events, one for
 	/// the deletion of the old file, and one for the creation of the

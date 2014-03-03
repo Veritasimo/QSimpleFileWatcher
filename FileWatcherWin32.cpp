@@ -49,7 +49,8 @@ namespace FW
 		bool mStopNow;
 		FileWatcherImpl* mFileWatcher;
 		FileWatchListener* mFileWatchListener;
-		char* mDirName;
+		TCHAR* mDirName;
+
 		WatchID mWatchid;
 	};
 
@@ -65,7 +66,7 @@ namespace FW
 		PFILE_NOTIFY_INFORMATION pNotify;
 		WatchStruct* pWatch = (WatchStruct*) lpOverlapped;
 		size_t offset = 0;
-
+		
 		if(dwNumberOfBytesTransfered == 0)
 			return;
 
@@ -188,7 +189,11 @@ namespace FW
 	{
 		WatchID watchid = ++mLastWatchID;
 
-		WatchStruct* watch = CreateWatch(directory.c_str(),
+		TCHAR *c_str = new TCHAR[directory.size() + 1];
+		c_str[directory.size()] = 0;
+		std::copy(directory.begin(), directory.end(), c_str);
+
+		WatchStruct* watch = CreateWatch(c_str,
 			FILE_NOTIFY_CHANGE_CREATION | FILE_NOTIFY_CHANGE_SIZE | FILE_NOTIFY_CHANGE_FILE_NAME);
 
 		if(!watch)
@@ -197,8 +202,13 @@ namespace FW
 		watch->mWatchid = watchid;
 		watch->mFileWatcher = this;
 		watch->mFileWatchListener = watcher;
-		watch->mDirName = new char[directory.length()+1];
+		watch->mDirName = new TCHAR[directory.length()+1];
+#ifdef UNICODE
+		wcscpy(watch->mDirName, directory.c_str());
+#else
 		strcpy(watch->mDirName, directory.c_str());
+#endif
+		
 
 		mWatches.insert(std::make_pair(watchid, watch));
 
