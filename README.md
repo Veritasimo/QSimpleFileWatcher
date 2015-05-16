@@ -1,5 +1,6 @@
 QSimpleFileWatcher
 =========
+**This library doesn't take kindly to Unicode. Probably best not to use it.**
 
 This is a wrapper around [SimpleFileWatcher](https://code.google.com/p/simplefilewatcher/) by [James Wynn](http://jameswynn.com/).
 
